@@ -1,11 +1,6 @@
-// import express from "express";
-
-// const app = express();
-
-// app.listen(5000, () => console.log("listening on port"));
-
 import puppeteer from "puppeteer";
 import { setTimeout } from "timers/promises";
+import PQueue from "p-queue";
 
 const browser = await puppeteer.launch({
   headless: false,
@@ -130,11 +125,14 @@ async function six() {
 
   // console.log({ sponsorsLinks, supportersLinks });
 
-  // const queue = new PQueue({concuren});
+  const queue = new PQueue({ concurrency: 3 });
   let allData = [];
   for (let link of supportersLinks) {
-    allData.push(await getLinks(link));
+    queue
+      .add(async () => allData.push(await getLinks(link)))
+      .catch(console.log);
   }
+  await queue.onEmpty();
 
   console.log(allData);
 
